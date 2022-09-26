@@ -9,6 +9,9 @@ pub struct Args {
     #[clap(short, long, value_parser)]
     pub file: Option<String>,
 
+    #[clap(short, long, value_parser)]
+    pub output: Option<String>,
+
     #[clap(short, long, value_parser, default_value_t = false)]
     pub raw: bool,
 
