@@ -1,25 +1,11 @@
 
+mod command;
+
 use std::fs;
 use std::io::{self, BufRead, BufReader, Read, BufWriter, Write, stdout};
+use command::Args;
 
 use clap::Parser;
-
-/// Simple program to greet a person
-#[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
-struct Args {
-    #[clap(short, long, value_parser)]
-    file: Option<String>,
-
-    #[clap(short, long, value_parser, default_value_t = false)]
-    raw: bool,
-
-    #[clap(short = 'e', long, value_parser, default_value_t = false)]
-    json_encode: bool,
-
-    #[clap(short = 'd', long, value_parser, default_value_t = false)]
-    json_decode: bool,
-}
 
 fn main() {
     let args = Args::parse();
@@ -29,6 +15,7 @@ fn main() {
         Some(filename) => Box::new(BufReader::new(fs::File::open(filename).unwrap())),
     };
 
+    // https://www.rfc-editor.org/rfc/rfc8259.html
     if args.json_decode {
         let mut buffer = String::new();
         reader.read_to_string(&mut buffer).unwrap();
