@@ -20,4 +20,10 @@ pub struct Args {
 
     #[clap(short = 'd', long, value_parser, default_value_t = false)]
     pub json_decode: bool,
+
+    #[clap(short = 'u', long, value_parser, default_value_t = false)]
+    pub lf: bool,
+
+    #[clap(short = 'w', long, value_parser, default_value_t = false)]
+    pub crlf: bool,
 }
