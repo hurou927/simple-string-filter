@@ -1,36 +1,13 @@
 mod command;
+mod helper;
 
 use command::Args;
 use std::fs;
 use std::io::{self, stdout, BufRead, BufReader, BufWriter, Write};
 
 use clap::Parser;
+use helper::*;
 
-fn run_all_input<R, W, F>(mut reader: R, mut writer: W, f: F)
-where
-    F: FnOnce(&str) -> String,
-    R: BufRead,
-    W: Write,
-{
-    let mut buffer = String::new();
-    reader.read_to_string(&mut buffer).unwrap();
-
-    let out = f(&buffer);
-    writer.write_all(out.as_bytes()).unwrap();
-}
-
-fn run_per_line<R, W, F> (reader: R, mut writer: W, mut f: F)
-where
-    F: FnMut(&str) -> String,
-    R: BufRead,
-    W: Write,
-{
-    for line in reader.lines() {
-        let out = f(&line.unwrap());
-        writer.write_all(out.as_bytes()).unwrap();
-        writer.flush().unwrap();
-    }
-}
 
 fn main() {
     let args = Args::parse();
@@ -67,19 +44,31 @@ fn main() {
             json_encoded_string
         });
     } else if args.lf {
-        run_per_line(reader, writer, |buffer| {
+        run_per_line_as_byte(reader, writer, |buffer| {
             let mut new_buffer = buffer.to_owned();
-            new_buffer.push('\n');
+            if new_buffer.ends_with(&[b'\n']) {
+                new_buffer.pop();
+                if new_buffer.ends_with(&[b'\r']) {
+                    new_buffer.pop();
+                }
+            }
+            new_buffer.push(b'\n');
             new_buffer
         });
     } else if args.crlf {
-        run_per_line(reader, writer, |buffer| {
+        run_per_line_as_byte(reader, writer, |buffer| {
             let mut new_buffer = buffer.to_owned();
-            new_buffer.push('\r');
-            new_buffer.push('\n');
+            if new_buffer.ends_with(&[b'\n']) {
+                new_buffer.pop();
+                if new_buffer.ends_with(&[b'\r']) {
+                    new_buffer.pop();
+                }
+            }
+            new_buffer.push(b'\r');
+            new_buffer.push(b'\n');
             new_buffer
         });
-
     } else {
+        do_nothing(reader, writer);
     }
 }
