@@ -1,13 +1,15 @@
 mod command;
-mod helper;
 mod core;
+mod helper;
+mod filter;
 
 use command::Args;
 use std::fs;
 use std::io::{self, stdout, BufRead, BufReader, BufWriter, Write};
-
+use filter::json::{JsonEncoder, JsonDecoder};
 use clap::Parser;
 use helper::*;
+
 
 fn main() {
     let args = Args::parse();
@@ -23,27 +25,13 @@ fn main() {
     };
 
     if args.json_decode {
-        run_all_input(reader, writer, |buffer| {
-            // https://www.rfc-editor.org/rfc/rfc8259.html
-            let out = if args.raw {
-                let new_buf = "\"".to_owned() + buffer + "\"";
-                serde_json::from_str(&new_buf)?
-            } else {
-                serde_json::from_str(buffer)?
-            };
-            Ok(out)
-        }).unwrap();
+        let jd = JsonDecoder::new(args.raw);
+        run_all_input(reader, writer, |buffer| jd.json_decode(buffer)).unwrap();
+
     } else if args.json_encode {
-        run_all_input(reader, writer, |buffer| {
-            // https://www.rfc-editor.org/rfc/rfc8259.html
-            let mut json_encoded_string = serde_json::to_string_pretty(buffer)?;
-            if args.raw {
-                // remove first and last double-quote
-                json_encoded_string.pop();
-                json_encoded_string.remove(0);
-            }
-            Ok(json_encoded_string)
-        }).unwrap();
+        let je = JsonEncoder::new(args.raw);
+        run_all_input(reader, writer, |buffer| je.json_ecode(buffer) ).unwrap();
+
     } else if args.lf {
         run_per_line_as_byte(reader, writer, |buffer| {
             let mut new_buffer = buffer.to_owned();
@@ -55,7 +43,8 @@ fn main() {
             }
             new_buffer.push(b'\n');
             Ok(new_buffer)
-        }).unwrap();
+        })
+        .unwrap();
     } else if args.crlf {
         run_per_line_as_byte(reader, writer, |buffer| {
             let mut new_buffer = buffer.to_owned();
@@ -68,7 +57,8 @@ fn main() {
             new_buffer.push(b'\r');
             new_buffer.push(b'\n');
             Ok(new_buffer)
-        }).unwrap();
+        })
+        .unwrap();
     } else {
         do_nothing(reader, writer).unwrap();
     }
