@@ -1,3 +1,4 @@
+
 use std::io::{BufRead, Write};
 
 use crate::core::error::FilterError;
@@ -58,15 +59,3 @@ where
     }
     Ok(())
 }
-// fn run_per_line<R, W, F>(reader: R, mut writer: W, mut f: F)
-// where
-//     F: FnMut(&str) -> String,
-//     R: BufRead,
-//     W: Write,
-// {
-//     for line in reader.lines() {
-//         let out = f(&line.unwrap());
-//         writer.write_all(out.as_bytes()).unwrap();
-//         writer.flush().unwrap();
-//     }
-// }

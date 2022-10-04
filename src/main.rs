@@ -4,11 +4,11 @@ mod helper;
 mod filter;
 
 use command::Args;
+use crate::core::processor;
 use std::fs;
 use std::io::{self, stdout, BufRead, BufReader, BufWriter, Write};
 use filter::json::{JsonEncoder, JsonDecoder};
 use clap::Parser;
-use helper::*;
 
 
 fn main() {
@@ -26,14 +26,14 @@ fn main() {
 
     if args.json_decode {
         let jd = JsonDecoder::new(args.raw);
-        run_all_input_as_utf8(reader, writer, |buffer| jd.json_decode(buffer)).unwrap();
+        processor::run_all_input_as_utf8(reader, writer, |buffer| jd.json_decode(buffer)).unwrap();
 
     } else if args.json_encode {
         let je = JsonEncoder::new(args.raw);
-        run_all_input_as_utf8(reader, writer, |buffer| je.json_ecode(buffer) ).unwrap();
+        processor::run_all_input_as_utf8(reader, writer, |buffer| je.json_ecode(buffer) ).unwrap();
 
     } else if args.lf {
-        run_per_line_as_byte(reader, writer, |buffer| {
+        processor::run_per_line_as_byte(reader, writer, |buffer| {
             let mut new_buffer = buffer.to_owned();
             if new_buffer.ends_with(&[b'\n']) {
                 new_buffer.pop();
@@ -46,7 +46,7 @@ fn main() {
         })
         .unwrap();
     } else if args.crlf {
-        run_per_line_as_byte(reader, writer, |buffer| {
+        processor::run_per_line_as_byte(reader, writer, |buffer| {
             let mut new_buffer = buffer.to_owned();
             if new_buffer.ends_with(&[b'\n']) {
                 new_buffer.pop();
@@ -60,6 +60,6 @@ fn main() {
         })
         .unwrap();
     } else {
-        do_nothing(reader, writer).unwrap();
+        processor::do_nothing(reader, writer).unwrap();
     }
 }
