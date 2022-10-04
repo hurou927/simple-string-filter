@@ -1,6 +1,9 @@
-
-
 use clap::Parser;
+
+use crate::filter::{
+    json::{JsonDecodeFilter, JsonEncodeFilter},
+    new_line::{ToCrLfFilter, ToLfFilter},
+};
 
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
@@ -26,4 +29,33 @@ pub struct Args {
 
     #[clap(short = 'w', long, value_parser, default_value_t = false)]
     pub crlf: bool,
+}
+
+#[derive(Debug)]
+pub enum FilterCommand {
+    JsonEcoder(JsonEncodeFilter),
+    JsonDecoder(JsonDecodeFilter),
+    ToLf(ToLfFilter),
+    ToCrLf(ToCrLfFilter),
+    DoNothing,
+}
+
+impl From<Args> for FilterCommand {
+    fn from(arg: Args) -> Self {
+        if arg.json_encode {
+            let filter = JsonEncodeFilter::new(arg.raw);
+            FilterCommand::JsonEcoder(filter)
+        } else if arg.json_decode {
+            let filter = JsonDecodeFilter::new(arg.raw);
+            FilterCommand::JsonDecoder(filter)
+        } else if arg.lf {
+            let filter = ToLfFilter {};
+            FilterCommand::ToLf(filter)
+        } else if arg.crlf {
+            let filter = ToCrLfFilter {};
+            FilterCommand::ToCrLf(filter)
+        } else {
+            FilterCommand::DoNothing
+        }
+    }
 }

@@ -1,16 +1,17 @@
 use crate::core::error::FilterError;
 
 
-pub struct JsonEncoder {
+#[derive(Debug)]
+pub struct JsonEncodeFilter {
     is_raw: bool,
 }
 
-impl JsonEncoder {
+impl JsonEncodeFilter {
     pub fn new(is_raw: bool) -> Self {
-        JsonEncoder { is_raw }
+        JsonEncodeFilter { is_raw }
     }
 
-    pub fn json_ecode(&self, buffer: &str) -> Result<String, FilterError> {
+    pub fn run(&self, buffer: &str) -> Result<String, FilterError> {
         let mut json_encoded_string = serde_json::to_string_pretty(buffer)?;
         if self.is_raw {
             // remove first and last double-quote
@@ -21,15 +22,16 @@ impl JsonEncoder {
     }
 }
 
-pub struct JsonDecoder {
+#[derive(Debug)]
+pub struct JsonDecodeFilter {
     is_raw: bool,
 }
 
-impl JsonDecoder {
+impl JsonDecodeFilter {
     pub fn new(is_raw: bool) -> Self {
-        JsonDecoder { is_raw }
+        JsonDecodeFilter { is_raw }
     }
-    pub fn json_decode(&self, buffer: &str) -> Result<String, FilterError> {
+    pub fn run(&self, buffer: &str) -> Result<String, FilterError> {
             // https://www.rfc-editor.org/rfc/rfc8259.html
             let out = if self.is_raw {
                let new_buf = "\"".to_owned() + buffer + "\"";
