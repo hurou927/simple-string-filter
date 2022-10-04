@@ -1,15 +1,14 @@
 mod command;
 mod core;
-mod helper;
 mod filter;
 
-use command::Args;
 use crate::core::processor;
+use clap::Parser;
+use command::Args;
+use filter::json::{JsonDecoder, JsonEncoder};
+use filter::new_line::{ToCrLf, ToLf};
 use std::fs;
 use std::io::{self, stdout, BufRead, BufReader, BufWriter, Write};
-use filter::json::{JsonEncoder, JsonDecoder};
-use clap::Parser;
-
 
 fn main() {
     let args = Args::parse();
@@ -27,38 +26,15 @@ fn main() {
     if args.json_decode {
         let jd = JsonDecoder::new(args.raw);
         processor::run_all_input_as_utf8(reader, writer, |buffer| jd.json_decode(buffer)).unwrap();
-
     } else if args.json_encode {
         let je = JsonEncoder::new(args.raw);
-        processor::run_all_input_as_utf8(reader, writer, |buffer| je.json_ecode(buffer) ).unwrap();
-
+        processor::run_all_input_as_utf8(reader, writer, |buffer| je.json_ecode(buffer)).unwrap();
     } else if args.lf {
-        processor::run_per_line_as_byte(reader, writer, |buffer| {
-            let mut new_buffer = buffer.to_owned();
-            if new_buffer.ends_with(&[b'\n']) {
-                new_buffer.pop();
-                if new_buffer.ends_with(&[b'\r']) {
-                    new_buffer.pop();
-                }
-            }
-            new_buffer.push(b'\n');
-            Ok(new_buffer)
-        })
-        .unwrap();
+        let to_lf = ToLf {};
+        processor::run_per_line_as_byte(reader, writer, |buffer| to_lf.run(buffer)).unwrap();
     } else if args.crlf {
-        processor::run_per_line_as_byte(reader, writer, |buffer| {
-            let mut new_buffer = buffer.to_owned();
-            if new_buffer.ends_with(&[b'\n']) {
-                new_buffer.pop();
-                if new_buffer.ends_with(&[b'\r']) {
-                    new_buffer.pop();
-                }
-            }
-            new_buffer.push(b'\r');
-            new_buffer.push(b'\n');
-            Ok(new_buffer)
-        })
-        .unwrap();
+        let to_cr_lf = ToCrLf {};
+        processor::run_per_line_as_byte(reader, writer, |buffer| to_cr_lf.run(buffer)).unwrap();
     } else {
         processor::do_nothing(reader, writer).unwrap();
     }
