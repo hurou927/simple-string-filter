@@ -5,7 +5,7 @@ use crate::core::error::FilterError;
 /// 1. Read all bytes as UTF-8 String
 /// 2. Run f with String
 /// 3. Write the result of 2
-pub fn run_all_input<R, W, F>(mut reader: R, mut writer: W, f: F) -> Result<(), FilterError>
+pub fn run_all_input_as_utf8<R, W, F>(mut reader: R, mut writer: W, f: F) -> Result<(), FilterError>
 where
     F: FnOnce(&str) -> Result<String, FilterError>,
     R: BufRead,

@@ -26,11 +26,11 @@ fn main() {
 
     if args.json_decode {
         let jd = JsonDecoder::new(args.raw);
-        run_all_input(reader, writer, |buffer| jd.json_decode(buffer)).unwrap();
+        run_all_input_as_utf8(reader, writer, |buffer| jd.json_decode(buffer)).unwrap();
 
     } else if args.json_encode {
         let je = JsonEncoder::new(args.raw);
-        run_all_input(reader, writer, |buffer| je.json_ecode(buffer) ).unwrap();
+        run_all_input_as_utf8(reader, writer, |buffer| je.json_ecode(buffer) ).unwrap();
 
     } else if args.lf {
         run_per_line_as_byte(reader, writer, |buffer| {
