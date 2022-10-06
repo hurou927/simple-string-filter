@@ -1,4 +1,3 @@
-
 use std::io;
 
 use thiserror::Error;
@@ -6,9 +5,11 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum FilterError {
     #[error("IOError")]
-    IoError(#[from] io::Error),
+    Io(#[from] io::Error),
+    #[error("fail to open file. path: {filename}")]
+    IoFaileToOpenFile { filename: String },
+    #[error("fail to create file. path: ${filename}. hint: --force: overwrite an exisitng file")]
+    IoFaileToCreateFile { filename: String },
     #[error("JsonError")]
-    JsonError(#[from] serde_json::error::Error),
-    // #[error("Unkwon error")]
-    // Unknown,
+    Json(#[from] serde_json::error::Error),
 }

@@ -6,10 +6,10 @@ use crate::core::error::FilterError;
 use crate::core::processor;
 use clap::Parser;
 use command::{Args, FilterCommand};
-use std::fs;
+
 use std::io::{self, stdout, BufRead, BufReader, BufWriter, Write};
 
-fn run<R, W>(reader: R, writer: W, filter_command: &FilterCommand) -> Result<(), FilterError>
+fn run_filter<R, W>(reader: R, writer: W, filter_command: &FilterCommand) -> Result<(), FilterError>
 where
     R: BufRead,
     W: Write,
@@ -35,20 +35,44 @@ where
     }
 }
 
-fn main() {
-    let args = Args::parse();
-
+fn run_main(args: &Args) -> Result<(), FilterError> {
     let reader: Box<dyn BufRead> = match args.file {
         None => Box::new(BufReader::new(io::stdin())),
-        Some(ref filename) => Box::new(BufReader::new(fs::File::open(filename).unwrap())),
+        Some(ref filename) => {
+            let file = std::fs::OpenOptions::new()
+                .read(true)
+                .open(filename)
+                .map_err(|_| FilterError::IoFaileToOpenFile{ filename: filename.to_owned() })?;
+            Box::new(BufReader::new(file))
+        }
     };
 
     let writer: Box<dyn Write> = match args.output {
         None => Box::new(BufWriter::new(stdout().lock())),
-        Some(ref filename) => Box::new(BufWriter::new(fs::File::create(filename).unwrap())),
+        Some(ref filename) => {
+            let file = std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(!args.force)
+                .create(args.force)
+                .open(filename)
+                .map_err(|_| FilterError::IoFaileToCreateFile { filename: filename.to_owned() })?;
+
+            Box::new(BufWriter::new(file))
+        }
     };
 
     let filter = FilterCommand::from(args);
 
-    run(reader, writer, &filter).unwrap();
+    run_filter(reader, writer, &filter)
+}
+
+fn main() {
+    let args = Args::parse();
+    match run_main(&args) {
+        Ok(_) => {},
+        Err(err) =>{
+            eprintln!("Error: {}", err);
+            std::process::exit(0x0100);
+        }
+    };
 }

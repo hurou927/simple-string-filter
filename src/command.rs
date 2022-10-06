@@ -15,6 +15,9 @@ pub struct Args {
     #[clap(short, long, value_parser)]
     pub output: Option<String>,
 
+    #[clap(long, value_parser, default_value_t = false)]
+    pub force: bool,
+
     #[clap(short, long, value_parser, default_value_t = false)]
     pub raw: bool,
 
@@ -40,8 +43,8 @@ pub enum FilterCommand {
     DoNothing,
 }
 
-impl From<Args> for FilterCommand {
-    fn from(arg: Args) -> Self {
+impl From<&Args> for FilterCommand {
+    fn from(arg: &Args) -> Self {
         if arg.json_encode {
             let filter = JsonEncodeFilter::new(arg.raw);
             FilterCommand::JsonEcoder(filter)

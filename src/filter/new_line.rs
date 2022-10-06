@@ -4,9 +4,6 @@ use crate::core::error::FilterError;
 pub struct ToLfFilter;
 
 impl ToLfFilter {
-    pub fn new() -> Self {
-        ToLfFilter {}
-    }
     pub fn run(&self, buffer: &[u8]) -> Result<Vec<u8>, FilterError> {
         let mut new_buffer = buffer.to_owned();
         if new_buffer.ends_with(&[b'\n']) {
@@ -24,9 +21,6 @@ impl ToLfFilter {
 pub struct ToCrLfFilter;
 
 impl ToCrLfFilter {
-    pub fn new() -> Self {
-        ToCrLfFilter {}
-    }
     pub fn run(&self, buffer: &[u8]) -> Result<Vec<u8>, FilterError> {
         let mut new_buffer = buffer.to_owned();
         if new_buffer.ends_with(&[b'\n']) {
