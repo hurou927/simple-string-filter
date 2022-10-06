@@ -11,7 +11,7 @@ mod tests {
         #[case("abc", "abc")]
         fn should_return_lf(#[case] input: &str, #[case] expected: &str) {
             let actual = ToLfFilter::new().run(input.as_bytes());
-            assert_eq!(actual.unwrap(), expected.as_bytes());
+            assert_eq!(expected.as_bytes(), actual.unwrap());
         }
 
         #[rstest]
@@ -20,7 +20,7 @@ mod tests {
         #[case("abc", "abc")]
         fn should_return_crlf(#[case] input: &str, #[case] expected: &str) {
             let actual = ToCrLfFilter::new().run(input.as_bytes());
-            assert_eq!(actual.unwrap(), expected.as_bytes());
+            assert_eq!(expected.as_bytes(), actual.unwrap());
         }
     }
 }
