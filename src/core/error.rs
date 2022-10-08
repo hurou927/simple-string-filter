@@ -10,6 +10,6 @@ pub enum FilterError {
     IoFaileToOpenFile { filename: String },
     #[error("fail to create file. path: ${filename}. hint: --force: overwrite an exisitng file")]
     IoFaileToCreateFile { filename: String },
-    #[error("JsonError")]
+    #[error("json error({0})")]
     Json(#[from] serde_json::error::Error),
 }
