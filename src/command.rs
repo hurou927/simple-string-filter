@@ -5,7 +5,7 @@ use crate::filter::{
     new_line::{ToCrLfFilter, ToLfFilter},
 };
 
-/// Simple program to greet a person
+/// Simple string filter
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 pub struct Args {
